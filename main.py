@@ -30,9 +30,7 @@ def em_function(user_input, df):
     return response
 
 df = pd.read_csv('teded_small.csv')
-
 df = df[['Title', 'Caption']]
-
 df['embeddings'] = df['Caption'].apply(generate_embeddings)
 
 def initialize_model():
@@ -42,27 +40,21 @@ def initialize_model():
     return chat
 
 def interact_with_user(user_input, selected_df):
-    # Aquí buscarías en los embeddings la respuesta más relevante
     response = em_function(user_input, selected_df)
     return response
 
 if __name__ == "__main__":
-    # Inicia modelo
     chat = initialize_model()
 
-# Pregunta al usuario qué contenido quiere usar
     print("Hola, ¿qué contenido de TED-Ed te gustaría explorar? Estos son algunos temas:")
     topics = df['Title'].unique()
     for i, topic in enumerate(topics):
         print(f"{i + 1}. {topic}")
 
-    # Recibe la elección del usuario
     choice = int(input("Selecciona el número correspondiente al tema que deseas explorar: ")) - 1
 
-    # Filtra el dataset para usar solo el contenido seleccionado por el usuario
     selected_df = df[df['Title'] == topics[choice]]
 
- # Interactúa con el usuario basado en la selección
     user_prompt = input("Haz tu pregunta relacionada con el tema seleccionado: ")
     response = interact_with_user(user_prompt, selected_df)
     print(f"Respuesta del modelo: {response}")
