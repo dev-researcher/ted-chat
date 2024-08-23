@@ -29,7 +29,7 @@ def em_function(user_input, df):
     response = df.iloc[most_similar_idx]['title']
     return response
 
-df = pd.read_csv('ted_ed.csv')
+df = pd.read_csv('teded.csv')
 
 # Ejemplo de procesamiento: Filtrar columnas relevantes
 df = df[['title', 'transcript']]
@@ -76,7 +76,7 @@ if __name__ == "__main__":
     response = interact_with_user(user_prompt, selected_df)
     print(f"Respuesta del modelo: {response}")
 
-    
+
     # prompts = [
         # "Hello.",
         # "What are all the colors in a rainbow?",
