@@ -26,22 +26,14 @@ def em_function(user_input, df):
     user_embedding = generate_embeddings(user_input)
     similarities = cosine_similarity([user_embedding], df['embeddings'].tolist())[0]
     most_similar_idx = np.argmax(similarities)
-    response = df.iloc[most_similar_idx]['title']
+    response = df.iloc[most_similar_idx]['Title']
     return response
 
-df = pd.read_csv('teded.csv')
+df = pd.read_csv('teded_small.csv')
 
-# Verificar si las columnas necesarias están presentes
-required_columns = ['title', 'caption']
-missing_columns = [col for col in required_columns if col not in df.columns]
-if missing_columns:
-    raise ValueError(f"Faltan las siguientes columnas en el archivo CSV: {', '.join(missing_columns)}")
+df = df[['Title', 'Caption']]
 
-# Filtrar columnas relevantes
-df = df[required_columns]
-
-# Generar embeddings para cada transcript
-df['embeddings'] = df['caption'].apply(generate_embeddings)
+df['embeddings'] = df['Caption'].apply(generate_embeddings)
 
 def initialize_model():
     init(project=PROJECT_ID, location=REGION)
@@ -49,9 +41,9 @@ def initialize_model():
     chat = model.start_chat()
     return chat
 
-def interact_with_user(user_input):
+def interact_with_user(user_input, selected_df):
     # Aquí buscarías en los embeddings la respuesta más relevante
-    response = em_function(user_input, df)
+    response = em_function(user_input, selected_df)
     return response
 
 if __name__ == "__main__":
@@ -60,7 +52,7 @@ if __name__ == "__main__":
 
 # Pregunta al usuario qué contenido quiere usar
     print("Hola, ¿qué contenido de TED-Ed te gustaría explorar? Estos son algunos temas:")
-    topics = df['title'].unique()
+    topics = df['Title'].unique()
     for i, topic in enumerate(topics):
         print(f"{i + 1}. {topic}")
 
@@ -68,7 +60,7 @@ if __name__ == "__main__":
     choice = int(input("Selecciona el número correspondiente al tema que deseas explorar: ")) - 1
 
     # Filtra el dataset para usar solo el contenido seleccionado por el usuario
-    selected_df = df[df['title'] == topics[choice]]
+    selected_df = df[df['Title'] == topics[choice]]
 
  # Interactúa con el usuario basado en la selección
     user_prompt = input("Haz tu pregunta relacionada con el tema seleccionado: ")

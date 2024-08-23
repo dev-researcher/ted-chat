@@ -3,3 +3,7 @@
 
 google-cloud-aiplatform
 vertexai
+pandas
+transformers
+torch
+scikit-learn
