@@ -24,6 +24,8 @@ from vertexai.generative_models import GenerativeModel, ChatSession
 from config import PROJECT_ID, REGION, MODEL_NAME
 from transformers import BertTokenizer, BertModel
 import torch
+from sklearn.metrics.pairwise import cosine_similarity
+import numpy as np
 
 # Cargar modelo y tokenizer de BERT
 tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
@@ -52,9 +54,16 @@ def initialize_model():
     chat = model.start_chat()
     return chat
 
+def em_function(user_input, df):
+    user_embedding = generate_embeddings(user_input)
+    similarities = cosine_similarity([user_embedding], df['embeddings'].tolist())[0]
+    most_similar_idx = np.argmax(similarities)
+    response = df.iloc[most_similar_idx]['title']
+    return response
+
 def interact_with_user(user_input):
     # Aquí buscarías en los embeddings la respuesta más relevante
-    response = your_model_function(user_input, df)
+    response = em_function(user_input, df)
     return response
 
 # def get_chat_response(chat: ChatSession, prompt: str) -> str:
