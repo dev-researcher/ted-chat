@@ -31,9 +31,16 @@ def em_function(user_input, df):
 
 df = pd.read_csv('teded.csv')
 
-# Ejemplo de procesamiento: Filtrar columnas relevantes
-df = df[['title', 'transcript']]
+# Verificar si las columnas necesarias están presentes
+required_columns = ['title', 'transcript']
+missing_columns = [col for col in required_columns if col not in df.columns]
+if missing_columns:
+    raise ValueError(f"Faltan las siguientes columnas en el archivo CSV: {', '.join(missing_columns)}")
 
+# Filtrar columnas relevantes
+df = df[required_columns]
+
+# Generar embeddings para cada transcript
 df['embeddings'] = df['transcript'].apply(generate_embeddings)
 
 def initialize_model():
@@ -46,14 +53,6 @@ def interact_with_user(user_input):
     # Aquí buscarías en los embeddings la respuesta más relevante
     response = em_function(user_input, df)
     return response
-
-# def get_chat_response(chat: ChatSession, prompt: str) -> str:
-#     # Envía like streaming
-#     text_response = []
-#     responses = chat.send_message(prompt, stream=True)
-#     for chunk in responses:
-#         text_response.append(chunk.text)
-#     return "".join(text_response)
 
 if __name__ == "__main__":
     # Inicia modelo
@@ -75,15 +74,3 @@ if __name__ == "__main__":
     user_prompt = input("Haz tu pregunta relacionada con el tema seleccionado: ")
     response = interact_with_user(user_prompt, selected_df)
     print(f"Respuesta del modelo: {response}")
-
-
-    # prompts = [
-        # "Hello.",
-        # "What are all the colors in a rainbow?",
-        # "Why does it appear when it rains?"
-    #     "de que color son las manzanas?"
-    # ]
-    
-    # for prompt in prompts:
-    #     response = get_chat_response(chat, prompt)
-    #     print(f"Model response to '{prompt}': {response}")
