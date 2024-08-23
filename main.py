@@ -26,9 +26,9 @@ def em_function(user_input):
     user_embedding = generate_embeddings(user_input)
     similarities = cosine_similarity([user_embedding], df['embeddings'].tolist())[0]
     most_similar_idx = np.argmax(similarities)
-    response = df.iloc[most_similar_idx]['Title'] + ", watch the video here: " + df.iloc[most_similar_idx]['Link']
-    print(similarities)
-    print(most_similar_idx)
+    response = df.iloc[most_similar_idx]['Title'] + ", you can watch the video here: " + df.iloc[most_similar_idx]['Link']
+    #print(similarities)
+    #print(most_similar_idx)
     return response
 
 df = pd.read_csv('teded_small.csv')
@@ -52,7 +52,7 @@ if __name__ == "__main__":
     # Inicia modelo
     chat = initialize_model()
     while(True):
-        user_prompt = input("Haz tu pregunta relacionada con el tema seleccionado o escribe exit para salir: ")
+        user_prompt = input("¿Qué es lo que te gustaría aprender? o escribe exit para salir: ")
         if(user_prompt.lower() == "exit"):
             break
         else:
