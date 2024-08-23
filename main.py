@@ -22,19 +22,29 @@ def generate_embeddings(text):
     embeddings = outputs.last_hidden_state.mean(dim=1).squeeze()
     return embeddings.numpy()
 
-def em_function(user_input):
+
+def em_function(user_input, df):
     user_embedding = generate_embeddings(user_input)
     similarities = cosine_similarity([user_embedding], df['embeddings'].tolist())[0]
     most_similar_idx = np.argmax(similarities)
-    response = df.iloc[most_similar_idx]['Title'] + ", watch the video here: " + df.iloc[most_similar_idx]['Link']
-    print(similarities)
-    print(most_similar_idx)
-    return response
+     # response = df.iloc[most_similar_idx]['Title']
+    response_caption = df.iloc[most_similar_idx]['Caption']
+    video_url = df.iloc[most_similar_idx]['URL']
+    return response_caption, video_url
+    # return response
+
+def find_matching_fragment(caption, user_keywords):
+    # Buscar coincidencias de palabras clave en el transcript o caption
+    for word in user_keywords:
+        if word.lower() in caption.lower():
+            start_idx = caption.lower().find(word.lower())
+            end_idx = start_idx + len(word) + 50  # Fragmento que incluye 50 caracteres después
+            return caption[start_idx:end_idx]  # Devolver el fragmento con la palabra clave
+    return "No se encontraron coincidencias en el transcript."
 
 df = pd.read_csv('teded_small.csv')
-
-df = df[['Title', 'Caption', 'Link']]
-
+df = df[['Title', 'Caption', 'URL']] 
+# df = df[['Title', 'Caption']]
 df['embeddings'] = df['Caption'].apply(generate_embeddings)
 
 def initialize_model():
@@ -43,18 +53,38 @@ def initialize_model():
     chat = model.start_chat()
     return chat
 
-def interact_with_user(user_input):
-    # Aquí buscarías en los embeddings la respuesta más relevante
-    response = em_function(user_input)
-    return response
+def interact_with_user(user_input, selected_df):
+    user_keywords = user_input.split()
+    response_caption, video_url = em_function(user_input, selected_df)
+    matching_fragment = find_matching_fragment(response_caption, user_keywords)
+    return matching_fragment, video_url 
+
+# def interact_with_user(user_input, selected_df):
+#     response = em_function(user_input, selected_df)
+#     return response
 
 if __name__ == "__main__":
     # Inicia modelo
     chat = initialize_model()
-    while(True):
-        user_prompt = input("Haz tu pregunta relacionada con el tema seleccionado o escribe exit para salir: ")
-        if(user_prompt.lower() == "exit"):
-            break
-        else:
-            response = interact_with_user(user_prompt)
-            print(f"Respuesta del modelo: {response}")
+
+    print("Hola, ¿qué contenido de TED-Ed te gustaría explorar? Estos son algunos temas:")
+    topics = df['Title'].unique()
+    for i, topic in enumerate(topics):
+        print(f"{i + 1}. {topic}")
+
+    # choice = int(input("Selecciona el número correspondiente al tema que deseas explorar: ")) - 1
+
+    # selected_df = df[df['Title'] == topics[choice]]
+
+    # user_prompt = input("Haz tu pregunta relacionada con el tema seleccionado: ")
+    # response = interact_with_user(user_prompt, selected_df)
+    # print(f"Respuesta del modelo: {response}")
+
+    choice = int(input("Selecciona el número correspondiente al tema que deseas explorar: ")) - 1
+
+    selected_df = df[df['Title'] == topics[choice]]
+
+    user_prompt = input("Haz tu pregunta relacionada con el tema seleccionado: ")
+    matching_fragment, video_url = interact_with_user(user_prompt, selected_df)
+    print(f"Fragmento del transcript relevante: {matching_fragment}")
+    print(f"Puedes ver el video aquí: {video_url}")
