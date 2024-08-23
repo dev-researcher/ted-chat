@@ -31,7 +31,7 @@ def em_function(user_input):
     #print(most_similar_idx)
     return response
 
-df = pd.read_csv('teded_small.csv')
+df = pd.read_csv('teded100.csv')
 
 df = df[['Title', 'Caption', 'Link']]
 
