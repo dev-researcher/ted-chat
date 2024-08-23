@@ -1,1 +1,1 @@
-# ted-chat
+# gemini-chat
