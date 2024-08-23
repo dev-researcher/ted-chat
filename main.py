@@ -32,7 +32,7 @@ def em_function(user_input, df):
 df = pd.read_csv('teded.csv')
 
 # Verificar si las columnas necesarias están presentes
-required_columns = ['title', 'transcript']
+required_columns = ['title', 'caption']
 missing_columns = [col for col in required_columns if col not in df.columns]
 if missing_columns:
     raise ValueError(f"Faltan las siguientes columnas en el archivo CSV: {', '.join(missing_columns)}")
@@ -41,7 +41,7 @@ if missing_columns:
 df = df[required_columns]
 
 # Generar embeddings para cada transcript
-df['embeddings'] = df['transcript'].apply(generate_embeddings)
+df['embeddings'] = df['caption'].apply(generate_embeddings)
 
 def initialize_model():
     init(project=PROJECT_ID, location=REGION)
