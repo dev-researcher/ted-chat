@@ -22,6 +22,13 @@ def generate_embeddings(text):
     embeddings = outputs.last_hidden_state.mean(dim=1).squeeze()
     return embeddings.numpy()
 
+def em_function(user_input, df):
+    user_embedding = generate_embeddings(user_input)
+    similarities = cosine_similarity([user_embedding], df['embeddings'].tolist())[0]
+    most_similar_idx = np.argmax(similarities)
+    response = df.iloc[most_similar_idx]['title']
+    return response
+
 df = pd.read_csv('ted_ed.csv')
 
 # Ejemplo de procesamiento: Filtrar columnas relevantes
@@ -34,13 +41,6 @@ def initialize_model():
     model = GenerativeModel(model_name=MODEL_NAME)
     chat = model.start_chat()
     return chat
-
-def em_function(user_input, df):
-    user_embedding = generate_embeddings(user_input)
-    similarities = cosine_similarity([user_embedding], df['embeddings'].tolist())[0]
-    most_similar_idx = np.argmax(similarities)
-    response = df.iloc[most_similar_idx]['title']
-    return response
 
 def interact_with_user(user_input):
     # Aquí buscarías en los embeddings la respuesta más relevante
@@ -59,13 +59,31 @@ if __name__ == "__main__":
     # Inicia modelo
     chat = initialize_model()
 
-    prompts = [
+# Pregunta al usuario qué contenido quiere usar
+    print("Hola, ¿qué contenido de TED-Ed te gustaría explorar? Estos son algunos temas:")
+    topics = df['title'].unique()
+    for i, topic in enumerate(topics):
+        print(f"{i + 1}. {topic}")
+
+    # Recibe la elección del usuario
+    choice = int(input("Selecciona el número correspondiente al tema que deseas explorar: ")) - 1
+
+    # Filtra el dataset para usar solo el contenido seleccionado por el usuario
+    selected_df = df[df['title'] == topics[choice]]
+
+ # Interactúa con el usuario basado en la selección
+    user_prompt = input("Haz tu pregunta relacionada con el tema seleccionado: ")
+    response = interact_with_user(user_prompt, selected_df)
+    print(f"Respuesta del modelo: {response}")
+
+    
+    # prompts = [
         # "Hello.",
         # "What are all the colors in a rainbow?",
         # "Why does it appear when it rains?"
-        "de que color son las manzanas?"
-    ]
+    #     "de que color son las manzanas?"
+    # ]
     
-    for prompt in prompts:
-        response = get_chat_response(chat, prompt)
-        print(f"Model response to '{prompt}': {response}")
+    # for prompt in prompts:
+    #     response = get_chat_response(chat, prompt)
+    #     print(f"Model response to '{prompt}': {response}")
