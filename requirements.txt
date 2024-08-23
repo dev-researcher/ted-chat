@@ -1,5 +1,0 @@
-# google-cloud-aiplatform
-# google-auth
-
-google-cloud-aiplatform
-vertexai
